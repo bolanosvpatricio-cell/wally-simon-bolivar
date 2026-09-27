@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reserva de Canchas | Wally Simón Bolívar</title>
+  <!-- Tailwind CSS para diseño moderno -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 antialiased">
+
+  <!-- Encabezado / Branding -->
+  <header class="bg-emerald-700 text-white p-5 text-center shadow-md">
+    <h1 class="text-2xl font-bold tracking-wide">Wally Simón Bolívar</h1>
+    <p class="text-emerald-100 text-sm mt-1">Complejo Deportivo - Sistema de Reservas</p>
+  </header>
+
+  <main class="max-w-md mx-auto p-4 space-y-6">
+    
+    <!-- TARJETA 1: BÚSQUEDA DE DISPONIBILIDAD -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">1. Selecciona tu Fecha y Turno</h2>
+
+      <!-- Selección de Fecha (Restringido a 7 días) -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-600 mb-1">Día de Reserva</label>
+        <input type="date" id="fechaReserva" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
+
+      <!-- Banner de Aviso para reservas a más de 7 días -->
+      <div id="avisoWhatsApp" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-lg mb-4">
+        📌 Para reservas con más de 1 semana de anticipación, contáctanos directamente por WhatsApp:
+        <a id="btnWsAnticipado" href="#" target="_blank" class="block text-center mt-2 bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700">Escribir a WhatsApp</a>
+      </div>
+
+      <!-- Selección de Turno -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-600 mb-1">Turno del Día</label>
+        <select id="turno" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-2 focus:ring-emerald-500 outline-none">
+          <option value="">-- Selecciona Turno --</option>
+          <option value="Mañana">☀️ Mañana (09:00 - 14:00)</option>
+          <option value="Tarde">🌤️ Tarde (14:00 - 18:00)</option>
+          <option value="Noche">🌙 Noche (18:00 - 23:00)</option>
+        </select>
+      </div>
+
+      <!-- Duración -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-600 mb-1">Duración</label>
+        <select id="duracion" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-2 focus:ring-emerald-500 outline-none">
+          <option value="2">2 Horas (Recomendado)</option>
+          <option value="1">1 Hora (Mínimo)</option>
+        </select>
+      </div>
+
+      <button id="btnBuscar" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+        Buscar Horarios Disponibles
+      </button>
+    </div>
+
+    <!-- TARJETA 2: HORARIOS DISPONIBLES (Anti-Competencia) -->
+    <div id="seccionResultados" class="hidden bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">2. Horarios Libres</h2>
+      <div id="listaHorarios" class="space-y-3">
+        <!-- Se cargan dinámicamente -->
+      </div>
+    </div>
+
+    <!-- TARJETA 3: DATOS Y PRE-RESERVA -->
+    <div id="seccionFormulario" class="hidden bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">3. Completa tus Datos</h2>
+      
+      <!-- Detalle Tarifario -->
+      <div id="resumenPrecio" class="bg-emerald-50 p-3 rounded-lg mb-4 text-sm text-emerald-900 border border-emerald-200">
+        <!-- Calculado automáticamente -->
+      </div>
+
+      <!-- Temporizador de Compromiso (15 minutos) -->
+      <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4 text-center">
+        <p class="text-xs text-amber-800 font-semibold">⏳ Tiempo para confirmar con tu anticipo:</p>
+        <p id="temporizador" class="text-xl font-bold text-amber-900 mt-1">15:00</p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-gray-500 uppercase font-bold mb-1">Nombre Completo</label>
+          <input type="text" id="nombreCliente" placeholder="Ej: Juan Pérez" class="w-full border-gray-300 rounded-lg p-2.5 border focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 uppercase font-bold mb-1">Número de WhatsApp</label>
+          <input type="tel" id="telefonoCliente" placeholder="Ej: 60500000" class="w-full border-gray-300 rounded-lg p-2.5 border focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <button id="btnPreReserva" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2">
+          <span>📱</span> Enviar Pre-Reserva por WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <!-- TARJETA 4: GESTIÓN DE REPROGRAMACIÓN / CANCELACIÓN (Regla 48 Horas) -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2 border-b pb-2">🔍 Gestionar mi Reserva Existente</h2>
+      
+      <p class="text-xs text-gray-500 mb-4">
+        📌 <strong>Reglamento:</strong> Reprogramaciones o cancelaciones requieren mínimo <strong>48 horas de anticipación</strong>.
+      </p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fecha y Hora de tu Reserva</label>
+          <input type="datetime-local" id="fechaPartidoReserva" class="w-full border-gray-300 rounded-lg p-2.5 border text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <button id="btnVerificarPolitica" class="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-sm transition">
+          Verificar Opción de Cambio
+        </button>
+      </div>
+
+      <div id="resultadoGestion" class="hidden mt-4 p-4 rounded-lg text-sm"></div>
+    </div>
+
+  </main>
+
+  <!-- LÓGICA EN JAVASCRIPT -->
+  <script>
+    // CONFIGURACIÓN PRINCIPAL
+    const NUMERO_WHATSAPP = "59160570992"; // Tu número de contacto de WhatsApp
+    const TARIFA_NORMAL = 40; // Lun-Vie Mañana/Tarde (09:00 - 17:00)
+    const TARIFA_PICO = 45;   // Lun-Vie Noche (17:00+) y Sábados/Domingos
+
+    // Restringir calendario a máximo 7 días a futuro
+    const inputFecha = document.getElementById('fechaReserva');
+    const hoy = new Date();
+    inputFecha.min = hoy.toISOString().split('T')[0];
+
+    inputFecha.addEventListener('change', function() {
+      const fechaSel = new Date(this.value + 'T00:00:00');
+      const diffDias = Math.ceil((fechaSel - hoy) / (1000 * 60 * 60 * 24));
+
+      if (diffDias > 7) {
+        document.getElementById('avisoWhatsApp').classList.remove('hidden');
+        document.getElementById('btnBuscar').disabled = true;
+        document.getElementById('btnWsAnticipado').href = `https://wa.me/${NUMERO_WHATSAPP}?text=Hola,%20deseo%20reservar%20una%20cancha%20en%20Wally%20Sim%C3%B3n%20Bol%C3%ADvar%20para%20la%20fecha:%20${this.value}`;
+      } else {
+        document.getElementById('avisoWhatsApp').classList.add('hidden');
+        document.getElementById('btnBuscar').disabled = false;
+      }
+    });
+
+    let horarioSeleccionado = null;
+    let canchaSeleccionada = null;
+    let precioFinal = 0;
+    let anticipoCalculado = 0;
+    let tiempoRestante = 15 * 60; // 15 minutos en segundos
+    let timerInterval = null;
+
+    // Buscar Horarios Libres
+    document.getElementById('btnBuscar').addEventListener('click', function() {
+      const fecha = inputFecha.value;
+      const turno = document.getElementById('turno').value;
+
+      if (!fecha || !turno) {
+        alert('Por favor selecciona una fecha y un turno.');
+        return;
+      }
+
+      const lista = document.getElementById('listaHorarios');
+      lista.innerHTML = '';
+
+      let bloques = [];
+      if (turno === 'Mañana') bloques = ['09:00 - 11:00', '11:00 - 13:00'];
+      if (turno === 'Tarde') bloques = ['14:00 - 16:00', '16:00 - 18:00'];
+      if (turno === 'Noche') bloques = ['18:00 - 20:00', '19:00 - 21:00', '20:00 - 22:00', '21:00 - 23:00'];
+
+      bloques.forEach((bloque, index) => {
+        const cancha = `Cancha ${(index % 3) + 1}`;
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-3 border rounded-lg hover:bg-emerald-50 cursor-pointer transition border-gray-200";
+        div.innerHTML = `
+          <div>
+            <span class="font-bold text-gray-800">${bloque}</span>
+            <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full ml-2">${cancha}</span>
+          </div>
+          <button class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-md font-semibold">Seleccionar</button>
+        `;
+        div.onclick = () => seleccionarHorario(bloque, cancha, fecha);
+        lista.appendChild(div);
+      });
+
+      document.getElementById('seccionResultados').classList.remove('hidden');
+    });
+
+    function seleccionarHorario(horario, cancha, fecha) {
+      horarioSeleccionado = horario;
+      canchaSeleccionada = cancha;
+
+      const dateObj = new Date(fecha + 'T00:00:00');
+      const diaSemana = dateObj.getDay(); // 0: Domingo, 6: Sábado
+      const horaInicio = parseInt(horario.split(':')[0]);
+      const duracion = parseInt(document.getElementById('duracion').value);
+
+      // Regla de tarifas
+      let tarifaHora = TARIFA_NORMAL;
+      if (diaSemana === 0 || diaSemana === 6 || horaInicio >= 17) {
+        tarifaHora = TARIFA_PICO;
+      }
+
+      precioFinal = tarifaHora * duracion;
+      anticipoCalculado = precioFinal * 0.5;
+
+      document.getElementById('resumenPrecio').innerHTML = `
+        <p><strong>Cancha:</strong> ${cancha} | <strong>Horario:</strong> ${horario}</p>
+        <p><strong>Monto Total:</strong> Bs. ${precioFinal} (${duracion} hrs x Bs. ${tarifaHora})</p>
+        <p class="text-emerald-800 font-bold mt-1">💡 Anticipo del 50% requerido: Bs. ${anticipoCalculado}</p>
+      `;
+
+      document.getElementById('seccionFormulario').classList.remove('hidden');
+      document.getElementById('seccionFormulario').scrollIntoView({ behavior: 'smooth' });
+
+      // Iniciar Temporizador de 15 min
+      iniciarTemporizador();
+    }
+
+    function iniciarTemporizador() {
+      clearInterval(timerInterval);
+      tiempoRestante = 15 * 60;
+      timerInterval = setInterval(() => {
+        const minutos = Math.floor(tiempoRestante / 60);
+        const segundos = tiempoRestante % 60;
+        document.getElementById('temporizador').textContent = 
+          `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        
+        if (tiempoRestante <= 0) {
+          clearInterval(timerInterval);
+          alert('El tiempo de pre-reserva ha expirado. Por favor selecciona el horario de nuevo.');
+          document.getElementById('seccionFormulario').classList.add('hidden');
+        }
+        tiempoRestante--;
+      }, 1000);
+    }
+
+    // Enviar Pre-Reserva
+    document.getElementById('btnPreReserva').addEventListener('click', function() {
+      const nombre = document.getElementById('nombreCliente').value;
+      const telefono = document.getElementById('telefonoCliente').value;
+      const fecha = inputFecha.value;
+
+      if (!nombre || !telefono) {
+        alert('Por favor completa tu nombre y número de WhatsApp.');
+        return;
+      }
+
+      const mensaje = `Hola!%20Quiero%20solicitar%20una%20*Pre-Reserva*%20en%20*Wally%20Sim%C3%B3n%20Bol%C3%ADvar*:%0A%0A` +
+                      `👤%20*Cliente:*%20${encodeURIComponent(nombre)}%0A` +
+                      `📞%20*Teléfono:*%20${encodeURIComponent(telefono)}%0A` +
+                      `📅%20*Fecha:*%20${fecha}%0A` +
+                      `⚽%20*Cancha:*%20${canchaSeleccionada}%0A` +
+                      `⏰%20*Horario:*%20${horarioSeleccionado}%0A` +
+                      `💵%20*Monto%20Total:*%20Bs.%20${precioFinal}%0A` +
+                      `💳%20*Anticipo%20a%20transferir%20(50%25):*%20Bs.%20${anticipoCalculado}%0A%0A` +
+                      `Por%20favor%20envíenme%20el%20QR%20para%20confirmar%20mi%20reserva.`;
+
+      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${mensaje}`, '_blank');
+    });
+
+    // Verificar Política 48 Horas
+    document.getElementById('btnVerificarPolitica').addEventListener('click', function() {
+      const fechaInput = document.getElementById('fechaPartidoReserva').value;
+      const resultadoDiv = document.getElementById('resultadoGestion');
+
+      if (!fechaInput) {
+        alert('Ingresa la fecha y hora de tu reserva.');
+        return;
+      }
+
+      const fechaReserva = new Date(fechaInput);
+      const ahora = new Date();
+      const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
+
+      resultadoDiv.classList.remove('hidden', 'bg-green-50', 'text-green-800', 'bg-red-50', 'text-red-800', 'border-green-200', 'border-red-200');
+
+      if (diffHoras >= 48) {
+        resultadoDiv.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+        resultadoDiv.innerHTML = `
+          <p class="font-bold">✅ Reprogramación / Cancelación Permitida</p>
+          <p class="text-xs mt-1">Estás solicitando con <strong>${Math.floor(diffHoras)} horas</strong> de anticipación (mínimo 48h).</p>
+          <a href="https://wa.me/${NUMERO_WHATSAPP}?text=Hola!%20Deseo%20solicitar%20cambio%20de%20horario/cancelación%20de%20mi%20reserva%20para%20${encodeURIComponent(fechaInput)}." 
+             target="_blank" 
+             class="block text-center bg-green-600 text-white font-bold py-2 rounded-lg text-xs mt-3 hover:bg-green-700">
+             Contactar por WhatsApp
+          </a>
+        `;
+      } else if (diffHoras > 0 && diffHoras < 48) {
+        resultadoDiv.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+        resultadoDiv.innerHTML = `
+          <p class="font-bold">🚫 Cambio No Permitido (Fuera de Plazo)</p>
+          <p class="text-xs mt-1">Faltan solo <strong>${Math.floor(diffHoras)} horas</strong> para tu partido. El límite para cambios es de 48 horas.</p>
+          <p class="text-xs font-semibold mt-2">Según el reglamento, el anticipo abonado no es reembolsable.</p>
+        `;
+      } else {
+        resultadoDiv.classList.add('bg-gray-100', 'text-gray-700', 'border', 'border-gray-200');
+        resultadoDiv.innerHTML = `<p class="font-bold">⚠️ Esta fecha o hora ya ha pasado.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
